@@ -1,0 +1,48 @@
+#!/bin/sh
+# This script builds the image with either the specified argument
+# or default git long sha of the last commit
+
+# Exit script on any errors
+set -e
+
+#--- Functions ---
+must_be_git_repos() {
+  # Allow to fail but catch return code
+  set +e
+  # Get the commit SHA or error exit
+  git rev-parse --git-dir > /dev/null 2>&1
+  errcode=$?
+  set -e
+  if [ $errcode -ne 0 ]; then
+    echo "ERROR: not git repository, you must specify the image tag"
+    exit $errcode
+  fi
+}
+
+#--- MAIN ---
+
+# First argument is the required image name
+if [ -z "$1" ]; then
+  echo "ERROR: you must specify the image name to build"
+  exit 86
+fi
+image_name=$1
+
+# Optional second argument is the image tag
+# Otherwise the commit sha is used as the tag
+if [ ! -z "$2" ]; then
+  image_tag=$2
+  echo "Will build image using specified tag: [${image_tag}]"
+else
+  echo "No tag specified, will build image using commit SHA..."
+  must_be_git_repos
+  git_sha=$(git log -1 --pretty=%H)
+  image_tag=${git_sha}
+  echo "Commit SHA tag: [${image_tag}]"
+fi
+
+tagged_image=${image_name}:${image_tag}
+echo "Building image [${tagged_image}]..."
+
+docker build --no-cache -t ${tagged_image} .
+echo "Built image [${tagged_image}]"
