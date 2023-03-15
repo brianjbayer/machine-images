@@ -5,8 +5,8 @@
 ARG BASE_IMAGE=ruby:3.2.1-slim-bullseye
 FROM ${BASE_IMAGE}
 
-ARG BUNDLER_VER=2.4.7
-ARG RAILS_VER=7.0.4.2
+ARG BUNDLER_VER=2.4.8
+ARG RAILS_VER=7.0.4.3
 
 # Install Build Packages, Bundler, and rails
 ARG BUILD_PACKAGES='build-essential libpq-dev libsqlite3-dev'
